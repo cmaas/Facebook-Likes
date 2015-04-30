@@ -1,23 +1,24 @@
-<php
-require('FbLikes.class.php');
+<?php
+require('FacebookUrlStats.class.php');
 
-# create new instance of like class
-$FbLikes = new FbLikes();
+# create new instance of stats class
+$fbStats = new FacebookUrlStats();
 
-# add all the urls you want to measure
-$FbLikes->addUrl('http://earthpeople.se/labs/');
-$FbLikes->addUrl('http://wplove.se/kom-pa-wpbar/');
-$FbLikes->addUrl('http://debaser.se/');
+$urls_str = file_get_contents('urls.txt');
+$urls = explode("\n", $urls_str);
+foreach ($urls as $url) {
+	$fbStats->addUrl($url);
+}
 
-# set the sort order, either 'likes' or 'untouched'
-$FbLikes->order_by = 'likes';
+# get all the fb stats
+$stats = $fbStats->getStats();
 
-# get all the fb like data
-$likes = $FbLikes->getLikes();
+$fbStats->order_by = 'total_count';
+
 
 # echo the results
-if($likes){
-	foreach($likes as $row){
-		echo $row->normalized_url . ': ' . $row->like_count . " facebook likes\n";
+if ($stats){
+	foreach($stats as $row){
+		echo $row->normalized_url . ': ' . $row->{$fbStats->order_by} . "\n";
 	}
 }

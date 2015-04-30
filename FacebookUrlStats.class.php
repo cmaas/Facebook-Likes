@@ -28,35 +28,34 @@ if($likes){
 
 */
 
-class FbLikes{
+class FacebookURLStats {
 
-	function __construct(){
+	function __construct() {
 		$this->format = 'json';
 		$this->api_baseurl = 'http://api.facebook.com/restserver.php?method=links.getStats&urls=';
-		$this->order_by = 'likes';
-		$this->order = 'asc';
-		$this->likes = array();
+		$this->order_by = 'total_count';
+		$this->urls = array();
 		$this->poststring = '';
 		$this->result = '';
 		$this->formatted_result = '';
 	}
 
 	public function addUrl($url = ''){
-		$this->likes[] = urlencode($url);
+		$this->urls[] = urlencode($url);
 	}
 
-	public function getLikes(){
-		$this->poststring = implode(',', $this->likes);
+	public function getStats(){
+		$this->poststring = implode(',', $this->urls);
 		$this->result = $this->curlRequest();
 		return $this->formatResult($this->result);
 	}
 	
 	private function formatResult($json){
 		$jsonObj = @json_decode($json);
-		if($this->order_by == 'likes'){
+		if ($this->order_by && count($jsonObj) > 0 && property_exists($jsonObj[0], $this->order_by)){
 			uasort($jsonObj, function($a, $b) {
-				if( $a->like_count == $b->like_count ) return 0 ; 
-				return ($a->like_count > $b->like_count ) ? -1 : 1; 
+				if( $a->{$this->order_by} == $b->{$this->order_by} ) return 0 ; 
+				return ($a->{$this->order_by} > $b->{$this->order_by} ) ? -1 : 1; 
   			});
 		}
 		return $jsonObj;
